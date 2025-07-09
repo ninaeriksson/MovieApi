@@ -1,4 +1,6 @@
-﻿namespace MovieApi.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MovieApi.Models
 {
     public class MovieDetails
     {
@@ -6,5 +8,10 @@
         public string Synopsis { get; set; } = null!;
         public string Language { get; set; } = null!;
         public int Budget { get; set; }
+
+        public int MovieId { get; set; }
+
+        // Navigation prop
+        public Movie? Movie { get; set; }
     }
 }

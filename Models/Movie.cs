@@ -8,11 +8,10 @@
         public string Genre { get; set; } = null!;
         public int Duration { get; set; }
 
-        //FK
-        public int MovieDetailsId { get; set; }
+        public MovieDetails? MovieDetails { get; set; }
 
-        //Navigation prop
-        //public ICollection<Review> Reviews { get; set; } = new List<Review>();
-        //public ICollection<Actor> Actors { get; set; } = new List<Actor>();
+        // Navigation prop
+        public ICollection<Review> Reviews { get; set; } = [];
+        public ICollection<Actor> Actors { get; set; } = [];
     }
 }
