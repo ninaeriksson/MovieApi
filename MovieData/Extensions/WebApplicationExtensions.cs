@@ -1,8 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MovieApi.Data;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using MovieData.Context;
+using MovieData.Seed;
 using System.Diagnostics;
 
-namespace MovieApi.Extensions
+namespace MovieData.Extensions
 {
     public static class WebApplicationExtensions
     {

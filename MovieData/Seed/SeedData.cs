@@ -1,8 +1,10 @@
 ﻿using Bogus;
 using Microsoft.EntityFrameworkCore;
-using MovieApi.Models;
+using MovieCore.Models.Entities;
+using MovieData.Context;
+using MovieData.Extensions;
 
-namespace MovieApi.Data
+namespace MovieData.Seed
 {
     public class SeedData
     {

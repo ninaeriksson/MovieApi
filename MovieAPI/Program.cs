@@ -1,26 +1,27 @@
 using Microsoft.EntityFrameworkCore;
-using MovieApi.Data;
-using MovieApi.Extensions;
+using MovieCore.DomainContracts;
+using MovieData.Context;
+using MovieData.Extensions;
+using MovieData.Repositories;
+
 
 namespace MovieApi
 {
     public class Program
     {
-        //ToDo: tabort den här kommentaren
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
             builder.Services.AddDbContext<MovieApiContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("MovieApiContext") ?? 
                 throw new InvalidOperationException("Connection string 'MovieApiContext' not found.")));
 
 
             // Add services to the container.
-
             builder.Services.AddControllers();
-
             builder.Services.AddOpenApi();
-
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
