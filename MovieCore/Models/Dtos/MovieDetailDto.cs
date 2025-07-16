@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿//using System.ComponentModel.DataAnnotations;
 
-namespace MovieApi.Models.Dtos
+namespace MovieCore.Models.Dtos
 {
     public class MovieDetailDto
     {

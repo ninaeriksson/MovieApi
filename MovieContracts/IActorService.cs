@@ -1,4 +1,4 @@
-﻿using MovieApi.Models.Dtos;
+﻿using MovieCore.Models.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;

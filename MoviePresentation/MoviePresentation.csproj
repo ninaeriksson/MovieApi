@@ -6,4 +6,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MovieContracts\MovieContracts.csproj" />
+    <ProjectReference Include="..\MovieCore\MovieCore.csproj" />
+    <ProjectReference Include="..\MovieServices\MovieServices.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using MovieContracts;
 using MovieCore.DomainContracts;
 using MovieData.Context;
 using MovieData.Extensions;
 using MovieData.Repositories;
+using MovieServices;
 
 
 namespace MovieApi
@@ -18,10 +20,12 @@ namespace MovieApi
                 throw new InvalidOperationException("Connection string 'MovieApiContext' not found.")));
 
 
-            // Add services to the container.
+            // Add services
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IServiceManager, ServiceManager>();
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())

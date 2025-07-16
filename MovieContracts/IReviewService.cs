@@ -1,4 +1,6 @@
-﻿using MovieApi.Models.Dtos;
+﻿
+
+using MovieCore.Models.Dtos;
 
 namespace MovieContracts
 {
