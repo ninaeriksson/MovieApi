@@ -18,12 +18,12 @@ namespace MovieServices
         }
 
         public IMovieService MovieService =>
-            movieService ??= new Services.MovieService(unitOfWork);
+            movieService ??= new MovieService(unitOfWork);
 
         public IReviewService ReviewService =>
-            reviewService ??= new Services.ReviewService(unitOfWork);
+            reviewService ??= new ReviewService(unitOfWork);
 
         public IActorService ActorService =>
-            actorService ??= new Services.ActorService(unitOfWork);
+            actorService ??= new ActorService(unitOfWork);
     }
 }

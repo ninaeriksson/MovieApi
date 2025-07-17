@@ -27,9 +27,4 @@
     <ProjectReference Include="..\MovieServices\MovieServices.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Data\" />
-    <Folder Include="Extensions\" />
-  </ItemGroup>
-
 </Project>

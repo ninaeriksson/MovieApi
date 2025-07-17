@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MovieCore.DomainContracts;
+using MovieContracts;
 
 namespace MoviePresentation.Controllers
 {
@@ -7,10 +7,11 @@ namespace MoviePresentation.Controllers
     [Route("api/actors")]
     public class ActorsController : ControllerBase
     {
-        private readonly IUnitOfWork unitOfWork;
-        public ActorsController(IUnitOfWork unitOfWork)
+        private readonly IServiceManager serviceManager;
+
+        public ActorsController(IServiceManager serviceManager)
         {
-            this.unitOfWork = unitOfWork;
+            this.serviceManager = serviceManager;
         }
 
         //private readonly MovieApiContext _context;
@@ -24,19 +25,10 @@ namespace MoviePresentation.Controllers
         [HttpPost("{actorId}/movies/{movieId}")]
         public async Task<IActionResult> AddActorToMovie(int actorId, int movieId)
         {
-            var movie = await unitOfWork.Movies.GetAsync(movieId);
-            if (movie == null)
-                return NotFound($"Filmen med id {movieId} hittades ej.");
+            var success = await serviceManager.ActorService.AddActorToMovieAsync(actorId, movieId);
 
-            var actor = await unitOfWork.Actors.GetAsync(actorId);
-            if (actor == null)
-                return NotFound($"Skådespelaren med id {actorId} hittades ej.");
-
-            if (movie.Actors.Any(a => a.Id == actorId))
-                return BadRequest("Skådespelaren finns redan registrerad på filmen.");
-
-            movie.Actors.Add(actor);
-            await unitOfWork.CompleteAsync();
+            if (!success)
+                return BadRequest("Det gick inte att lägga till skådespelaren på filmen.");
 
             return NoContent();
         }

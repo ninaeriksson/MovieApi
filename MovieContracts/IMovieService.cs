@@ -10,5 +10,6 @@ namespace MovieContracts
         Task<MovieDto> CreateMovieAsync(MovieCreateDto dto);
         Task<bool> UpdateMovieAsync(int id, MovieUpdateDto dto);
         Task<bool> DeleteMovieAsync(int id);
+        Task<bool> AnyAsync(int id);
     }
 }

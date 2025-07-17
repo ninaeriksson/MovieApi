@@ -13,12 +13,28 @@ namespace MovieServices.Services
             this.unitOfWork = unitOfWork;
         }
 
-        public Task<bool> AddActorToMovieAsync(int actorId, int movieId)
+
+        public async Task<bool> AddActorToMovieAsync(int actorId, int movieId)
         {
-            throw new NotImplementedException();
+            var movie = await unitOfWork.Movies.GetAsync(movieId);
+            if (movie == null)
+                return false;
+
+            var actor = await unitOfWork.Actors.GetAsync(actorId);
+            if (actor == null)
+                return false;
+
+            if (movie.Actors.Any(a => a.Id == actorId))
+                return false;
+
+            movie.Actors.Add(actor);
+            await unitOfWork.CompleteAsync();
+
+            return true;
         }
 
-        public async Task<IEnumerable<ActorDto>> GetAllActorsAsync()
+
+        public async Task<IEnumerable<ActorDto>> GetAllAsync()
         {
             var actors = await unitOfWork.Actors.GetAllAsync();
 
@@ -27,18 +43,23 @@ namespace MovieServices.Services
                 Name = a.Name,
                 BirthYear = a.BirthYear
             });
-
             return dtos;
         }
 
-        public Task<IEnumerable<ActorDto>> GetAllAsync()
+
+        public async Task<ActorDto?> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            var actor = await unitOfWork.Actors.GetAsync(id);
+
+            if (actor == null)
+                return null;
+
+            return new ActorDto
+            {
+                Name = actor.Name,
+                BirthYear = actor.BirthYear
+            };
         }
 
-        public Task<ActorDto?> GetByIdAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
