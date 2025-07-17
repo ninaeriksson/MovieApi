@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MovieCore.Models.Dtos;
 using MovieContracts;
+using MovieCore.Models.Dtos;
+using MovieCore.Models.Paging;
 
 namespace MoviePresentation.Controllers
 {
@@ -17,15 +18,28 @@ namespace MoviePresentation.Controllers
 
         // GET: api/reviews/movie/{movieId}
         [HttpGet("movie/{movieId}")]
-        public async Task<ActionResult<IEnumerable<ReviewDto>>> GetReviews(int movieId)
+        public async Task<ActionResult<PagedResponse<ReviewDto>>> GetReviews(int movieId, [FromQuery] PagingParameters paging)
         {
-            var reviews = await serviceManager.ReviewService.GetReviewsByMovieIdAsync(movieId);
+            var pagedResult = await serviceManager.ReviewService.GetReviewsByMovieIdAsync(movieId, paging);
 
-            if (reviews == null)
-                return NotFound($"Filmen med id {movieId} hittades inte.");
+            if (pagedResult.Items == null || !pagedResult.Items.Any())
+                return NotFound($"Filmen med id {movieId} hittades inte eller har inga recensioner.");
 
-            return Ok(reviews);
+            var response = new PagedResponse<ReviewDto>
+            {
+                Data = pagedResult.Items,
+                Meta = new PaginationMeta
+                {
+                    TotalItems = pagedResult.TotalItems,
+                    CurrentPage = pagedResult.CurrentPage,
+                    TotalPages = pagedResult.TotalPages,
+                    PageSize = pagedResult.PageSize
+                }
+            };
+
+            return Ok(response);
         }
+
     }
 }
 

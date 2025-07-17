@@ -1,16 +1,13 @@
 ﻿using MovieCore.DomainContracts;
+using MovieCore.Models.Dtos;
 using MovieCore.Models.Entities;
+using MovieCore.Models.Paging;
 using MovieData.Context;
-using System;
-using System.Collections.Generic;
 using System.Data.Entity;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MovieData.Repositories
 {
-    internal class ReviewRepository : IReviewRepository
+    public class ReviewRepository : IReviewRepository
     {
         private readonly MovieApiContext context;
 
@@ -36,6 +33,17 @@ namespace MovieData.Repositories
                 .ToListAsync();
         }
 
+        public IQueryable<Review> GetAll()
+        {
+            return context.Reviews;
+        }
+
+        public IQueryable<Review> GetByMovieId(int movieId)
+        {
+            return context.Reviews
+                .Where(r => r.MovieId == movieId);
+        }
+
         public async Task<Review> GetAsync(int id)
         {
             return await context.Reviews
@@ -52,5 +60,6 @@ namespace MovieData.Repositories
         {
             context.Reviews.Update(review);
         }
+
     }
 }

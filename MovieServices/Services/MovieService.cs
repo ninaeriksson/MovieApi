@@ -1,7 +1,9 @@
-﻿using MovieContracts;
+﻿using Microsoft.EntityFrameworkCore;
+using MovieContracts;
 using MovieCore.DomainContracts;
 using MovieCore.Models.Dtos;
 using MovieCore.Models.Entities;
+using MovieCore.Models.Paging;
 
 namespace MovieServices.Services
 {
@@ -67,23 +69,39 @@ namespace MovieServices.Services
         }
 
 
-        public async Task<IEnumerable<MovieDto>> GetAllMoviesAsync()
+        public async Task<PagedResult<MovieDto>> GetAllAsync(PagingParameters paging)
         {
-            var movies = await unitOfWork.Movies.GetAllAsync();
+            var query = unitOfWork.Movies.GetAll();
 
-            var dtos = movies.Select(m => new MovieDto
+            int totalItems = await query.CountAsync();
+
+            int pageSize = Math.Min(paging.PageSize, 100);
+            int currentPage = paging.Page < 1 ? 1 : paging.Page;
+
+            var items = await query
+                .Skip((currentPage - 1) * pageSize)
+                .Take(pageSize)
+                .Select(m => new MovieDto
+                {
+                    Id = m.Id,
+                    Title = m.Title,
+                    Year = m.Year,
+                    Genre = m.Genre,
+                    Duration = m.Duration,
+                    Synopsis = m.MovieDetails.Synopsis,
+                    Language = m.MovieDetails.Language,
+                    Budget = m.MovieDetails.Budget
+                })
+                .ToListAsync();
+
+            return new PagedResult<MovieDto>
             {
-                Id = m.Id,
-                Title = m.Title,
-                Year = m.Year,
-                Genre = m.Genre,
-                Duration = m.Duration,
-                Synopsis = m.MovieDetails.Synopsis,
-                Language = m.MovieDetails.Language,
-                Budget = m.MovieDetails.Budget
-            });
-
-            return dtos;
+                Items = items,
+                TotalItems = totalItems,
+                CurrentPage = paging.Page,
+                PageSize = paging.PageSize,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)paging.PageSize)
+            };
         }
 
 

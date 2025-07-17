@@ -24,13 +24,12 @@ namespace MovieData.Repositories
             return await context.Movies.AnyAsync(m => m.Id == id);
         }
 
-        public async Task<IEnumerable<Movie>> GetAllAsync()
+        public IQueryable<Movie> GetAll()
         {
-            return await context.Movies
+            return context.Movies
                 .Include(m => m.MovieDetails)
                 .Include(m => m.Reviews)
-                .Include(m => m.Actors)
-                .ToListAsync();
+                .Include(m => m.Actors);
         }
 
         public async Task<Movie> GetAsync(int id)

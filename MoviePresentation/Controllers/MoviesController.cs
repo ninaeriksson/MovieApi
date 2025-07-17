@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MovieContracts;
 using MovieCore.Models.Dtos;
+using MovieCore.Models.Paging;
 
 namespace MoviePresentation.Controllers
 {
@@ -25,11 +26,25 @@ namespace MoviePresentation.Controllers
 
         // GET: api/movies
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MovieDto>>> GetAllMovies()
+        public async Task<ActionResult<PagedResponse<MovieDto>>> GetAll([FromQuery] PagingParameters paging)
         {
-            var movies = await serviceManager.MovieService.GetAllMoviesAsync();
-            return Ok(movies);
+            var pagedResult = await serviceManager.MovieService.GetAllAsync(paging);
+
+            var response = new PagedResponse<MovieDto>
+            {
+                Data = pagedResult.Items,
+                Meta = new PaginationMeta
+                {
+                    TotalItems = pagedResult.TotalItems,
+                    CurrentPage = pagedResult.CurrentPage,
+                    TotalPages = pagedResult.TotalPages,
+                    PageSize = pagedResult.PageSize
+                }
+            };
+
+            return Ok(response);
         }
+
 
         //// GET: api/movies
         //[HttpGet]

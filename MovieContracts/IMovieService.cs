@@ -1,10 +1,11 @@
 ﻿using MovieCore.Models.Dtos;
+using MovieCore.Models.Paging;
 
 namespace MovieContracts
 {
     public interface IMovieService
     {
-        Task<IEnumerable<MovieDto>> GetAllMoviesAsync();
+        Task<PagedResult<MovieDto>> GetAllAsync(PagingParameters paging);
         Task<MovieDto?> GetMovieByIdAsync(int id);
         Task<MovieDetailDto?> GetMovieDetailsAsync(int id);
         Task<MovieDto> CreateMovieAsync(MovieCreateDto dto);
