@@ -39,7 +39,7 @@ namespace MovieApi
 
                 if (shouldSeed)
                 {
-                    await app.SeedDataAsync();
+                    await app.SeedDataAsync(numberOfActors: 100, numberOfMovies: 50);
                 }
             }
 

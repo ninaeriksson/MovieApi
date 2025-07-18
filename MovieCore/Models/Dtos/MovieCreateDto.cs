@@ -13,8 +13,7 @@ namespace MovieCore.Models.Dtos
         public int Year { get; set; }
 
         [Required]
-        [StringLength(30)]
-        public string Genre { get; set; } = null!;
+        public int GenreId { get; set; }
 
         [Required]
         [Range(10, 300)]

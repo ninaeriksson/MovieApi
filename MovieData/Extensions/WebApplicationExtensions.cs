@@ -10,7 +10,8 @@ namespace MovieData.Extensions
     public static class WebApplicationExtensions
     {
         //Anropas endast om shouldSeed är true i appsettings.Development.json
-        public static async Task SeedDataAsync(this IApplicationBuilder app)
+        public static async Task SeedDataAsync(
+            this IApplicationBuilder app, int numberOfActors, int numberOfMovies)
         {
             using (var scope = app.ApplicationServices.CreateScope())
             {
@@ -25,7 +26,7 @@ namespace MovieData.Extensions
                     // Rensa data i tabellerna utan att radera databasen
                     await SeedData.ClearDatabaseAsync(context);
 
-                    await SeedData.InitAsync(context);
+                    await SeedData.InitAsync(context, numberOfActors, numberOfMovies);
                 }
                 catch (Exception ex)
                 {                   // sätta debuggern på denna rad när seeda data!!

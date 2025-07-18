@@ -23,11 +23,17 @@ namespace MovieServices.Services
 
         public async Task<MovieDto> CreateMovieAsync(MovieCreateDto dto)
         {
+            var genre = await unitOfWork.Genres.GetByIdAsync(dto.GenreId);
+            if (genre == null)
+            {
+                throw new ArgumentException($"Genren med id {dto.GenreId} finns inte.");
+            }
+
             var movie = new Movie
             {
                 Title = dto.Title,
                 Year = dto.Year,
-                Genre = dto.Genre,
+                GenreId = genre.Id,
                 Duration = dto.Duration,
                 MovieDetails = new MovieDetails
                 {
@@ -42,16 +48,25 @@ namespace MovieServices.Services
             unitOfWork.Movies.Add(movie);
             await unitOfWork.CompleteAsync();
 
+            var createdMovie = await unitOfWork.Movies
+                .GetAll()
+                .Include(m => m.Genre)
+                .Include(m => m.MovieDetails)
+                .FirstOrDefaultAsync(m => m.Id == movie.Id);
+
+            if (createdMovie == null)
+                throw new Exception("Något gick fel vid skapandet av filmen.");
+
             return new MovieDto
             {
-                Id = movie.Id,
-                Title = movie.Title,
-                Year = movie.Year,
-                Genre = movie.Genre,
-                Duration = movie.Duration,
-                Synopsis = movie.MovieDetails.Synopsis,
-                Language = movie.MovieDetails.Language,
-                Budget = movie.MovieDetails.Budget
+                Id = createdMovie.Id,
+                Title = createdMovie.Title,
+                Year = createdMovie.Year,
+                Genre = createdMovie.Genre?.Name ?? "",
+                Duration = createdMovie.Duration,
+                Synopsis = createdMovie.MovieDetails?.Synopsis ?? "",
+                Language = createdMovie.MovieDetails?.Language ?? "",
+                Budget = createdMovie.MovieDetails?.Budget ?? 0
             };
         }
 
@@ -71,7 +86,10 @@ namespace MovieServices.Services
 
         public async Task<PagedResult<MovieDto>> GetAllAsync(PagingParameters paging)
         {
-            var query = unitOfWork.Movies.GetAll();
+            var query = unitOfWork.Movies
+                .GetAll()
+                .Include(m => m.Genre)
+                .Include(m => m.MovieDetails);
 
             int totalItems = await query.CountAsync();
 
@@ -86,11 +104,11 @@ namespace MovieServices.Services
                     Id = m.Id,
                     Title = m.Title,
                     Year = m.Year,
-                    Genre = m.Genre,
+                    Genre = m.Genre != null ? m.Genre.Name : "Okänd",
                     Duration = m.Duration,
-                    Synopsis = m.MovieDetails.Synopsis,
-                    Language = m.MovieDetails.Language,
-                    Budget = m.MovieDetails.Budget
+                    Synopsis = m.MovieDetails != null ? m.MovieDetails.Synopsis : "",
+                    Language = m.MovieDetails != null ? m.MovieDetails.Language : "",
+                    Budget = m.MovieDetails != null ? m.MovieDetails.Budget : 0
                 })
                 .ToListAsync();
 
@@ -98,11 +116,12 @@ namespace MovieServices.Services
             {
                 Items = items,
                 TotalItems = totalItems,
-                CurrentPage = paging.Page,
-                PageSize = paging.PageSize,
-                TotalPages = (int)Math.Ceiling(totalItems / (double)paging.PageSize)
+                CurrentPage = currentPage,
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
             };
         }
+
 
 
         public async Task<MovieDto?> GetMovieByIdAsync(int id)
@@ -117,13 +136,14 @@ namespace MovieServices.Services
                 Id = movie.Id,
                 Title = movie.Title,
                 Year = movie.Year,
-                Genre = movie.Genre,
+                Genre = movie.Genre?.Name ?? "",
                 Duration = movie.Duration,
-                Synopsis = movie.MovieDetails.Synopsis,
-                Language = movie.MovieDetails.Language,
-                Budget = movie.MovieDetails.Budget
+                Synopsis = movie.MovieDetails?.Synopsis ?? "",
+                Language = movie.MovieDetails?.Language ?? "",
+                Budget = movie.MovieDetails?.Budget ?? 0
             };
         }
+
 
 
         public async Task<MovieDetailDto?> GetMovieDetailsAsync(int id)
@@ -137,7 +157,7 @@ namespace MovieServices.Services
             {
                 Title = movie.Title,
                 Year = movie.Year,
-                Genre = movie.Genre,
+                Genre = movie.Genre?.Name ?? "", // <-- ändrad här
                 Duration = movie.Duration,
                 Synopsis = movie.MovieDetails?.Synopsis ?? "",
                 Language = movie.MovieDetails?.Language ?? "",
@@ -157,6 +177,7 @@ namespace MovieServices.Services
         }
 
 
+
         public async Task<bool> UpdateMovieAsync(int id, MovieUpdateDto dto)
         {
             var movie = await unitOfWork.Movies.GetAsync(id);
@@ -164,9 +185,13 @@ namespace MovieServices.Services
             if (movie == null)
                 return false;
 
+            var genre = await unitOfWork.Genres.GetByIdAsync(dto.GenreId);
+            if (genre == null)
+                return false;
+
             movie.Title = dto.Title;
             movie.Year = dto.Year;
-            movie.Genre = dto.Genre;
+            movie.Genre = genre;
             movie.Duration = dto.Duration;
 
             if (movie.MovieDetails == null)
@@ -181,6 +206,7 @@ namespace MovieServices.Services
 
             return true;
         }
+
 
     }
 }

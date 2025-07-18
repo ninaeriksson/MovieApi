@@ -14,6 +14,8 @@ namespace MovieData.Context
         public DbSet<Movie> Movies { get; set; } = default!;
         public DbSet<Review> Reviews { get; set; } = default!;
         public DbSet<Actor> Actors { get; set; } = default!;
+        public DbSet<Genre> Genres { get; set; } = default!;
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -36,6 +38,17 @@ namespace MovieData.Context
                         .HasMany(m => m.Reviews)
                         .WithOne(r => r.Movie)
                         .HasForeignKey(r => r.MovieId);
+
+            // Movie - Genre
+            modelBuilder.Entity<Movie>()
+                        .HasOne(m => m.Genre)
+                        .WithMany(g => g.Movies)
+                        .HasForeignKey(m => m.GenreId)
+                        .OnDelete(DeleteBehavior.Restrict); // Förhindrar att man råkar ta bort alla filmer om en genre tas bort
+
+            modelBuilder.Entity<Genre>()
+                        .HasIndex(g => g.Name)
+                        .IsUnique();
         }
     }
 }

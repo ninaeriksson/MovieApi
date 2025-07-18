@@ -15,6 +15,7 @@ namespace MovieData.Repositories
         public IMovieRepository Movies { get; }
         public IReviewRepository Reviews { get; }
         public IActorRepository Actors { get; }
+        public IGenreRepository Genres { get; }
 
         public UnitOfWork(MovieApiContext context)
         {
@@ -22,6 +23,7 @@ namespace MovieData.Repositories
             Movies = new MovieRepository(context);
             Reviews = new ReviewRepository(context);
             Actors = new ActorRepository(context);
+            Genres = new GenreRepository(context);
         }
 
         public async Task CompleteAsync()

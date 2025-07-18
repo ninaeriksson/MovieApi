@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using MovieCore.Models.Entities;
 using MovieData.Context;
-using MovieData.Extensions;
 
 namespace MovieData.Seed
 {
@@ -10,18 +9,36 @@ namespace MovieData.Seed
     {
         private static readonly Faker faker = new Faker("sv");
 
-        internal static async Task InitAsync(MovieApiContext context)
+        internal static async Task InitAsync(MovieApiContext context, int numberOfActors, int numberOfMovies)
         {
             if (await context.Movies.AnyAsync()) return;
 
-            // Rensa databasen
-            await ClearDatabaseAsync(context);
+            // Rensa databasen?? Görs redan i WebApplicationExtensions???
+            //await ClearDatabaseAsync(context);
 
             // Fyll på databasen
-            List<Actor> actors = GenerateActors(50);
+            // Seed Genre
+            List<Genre> genres = new List<Genre>
+            {
+                new Genre { Name = "Drama" },
+                new Genre { Name = "Action" },
+                new Genre { Name = "Komedi" },
+                new Genre { Name = "Äventyr" },
+                new Genre { Name = "Dokumentär" },
+                new Genre { Name = "Skräck" }
+            };
+            await context.AddRangeAsync(genres);
+            await context.SaveChangesAsync();
+
+            // Seed Actors
+            List<Actor> actors = GenerateActors(numberOfActors);
             await context.AddRangeAsync(actors);
-            List<Movie> movies = GenerateMovies(10, actors);
+            await context.SaveChangesAsync();
+
+            // Seed Movies (med genres och actors)
+            List<Movie> movies = GenerateMovies(numberOfMovies, actors, genres);
             await context.AddRangeAsync(movies);
+            await context.SaveChangesAsync();
 
             // Spara
             await context.SaveChangesAsync();
@@ -42,9 +59,9 @@ namespace MovieData.Seed
             return actors;
         }
 
-        private static List<Movie> GenerateMovies(int numberOfMovies, List<Actor> actors)
+        private static List<Movie> GenerateMovies(int numberOfMovies, List<Actor> actors, List<Genre> genres)
         {
-            string[] genres = { "Drama", "Action", "Komedi", "Äventyr", "Dokumentär", "Skräck" };
+            //string[] genres = { "Drama", "Action", "Komedi", "Äventyr", "Dokumentär", "Skräck" };
             string[] languages = { "Svenska", "Engelska", "Tyska", "Franska", "Spanska", "Finska" };
 
             List<Movie> movies = new List<Movie>(numberOfMovies);
@@ -57,7 +74,7 @@ namespace MovieData.Seed
             return movies;
         }
 
-        private static Movie CreateMovie(List<Actor> actors, string[] genres, string[] languages)
+        private static Movie CreateMovie(List<Actor> actors, List<Genre> genres, string[] languages)
         {
             int numberOfActors = faker.Random.Int(1, 10);
             List<Actor> randomActors = SelectRandomItems(actors, numberOfActors);
@@ -126,21 +143,34 @@ namespace MovieData.Seed
             return selectedItems;
         }
 
+
         public static async Task ClearDatabaseAsync(MovieApiContext context)
         {
             // Rensa tabellerna
-            await context.Database.ExecuteSqlRawAsync("DELETE FROM ActorMovie");
-            await context.Database.ExecuteSqlRawAsync("DELETE FROM Reviews");
-            await context.Database.ExecuteSqlRawAsync("DELETE FROM MovieDetails");
-            await context.Database.ExecuteSqlRawAsync("DELETE FROM Movies");
-            await context.Database.ExecuteSqlRawAsync("DELETE FROM Actors");
+            //await context.Database.ExecuteSqlRawAsync("DELETE FROM ActorMovie");
+            //await context.Database.ExecuteSqlRawAsync("DELETE FROM Reviews");
+            //await context.Database.ExecuteSqlRawAsync("DELETE FROM MovieDetails");
+            //await context.Database.ExecuteSqlRawAsync("DELETE FROM Movies");
+            //await context.Database.ExecuteSqlRawAsync("DELETE FROM Actors");
+            //await context.Database.ExecuteSqlRawAsync("DELETE FROM Genres");
+
+
+            context.Reviews.RemoveRange(context.Reviews);
+            context.MovieDetails.RemoveRange(context.MovieDetails);
+            await context.SaveChangesAsync();
+
+            context.Movies.RemoveRange(context.Movies);
+            context.Actors.RemoveRange(context.Actors);
+            context.Genres.RemoveRange(context.Genres);
+            await context.SaveChangesAsync();
 
             // Sätt indexeringen på 0 igen
             await context.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT ('Reviews', RESEED, 0)");
             await context.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT ('MovieDetails', RESEED, 0)");
             await context.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT ('Movies', RESEED, 0)");
             await context.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT ('Actors', RESEED, 0)");
-           
+            await context.Database.ExecuteSqlRawAsync("DBCC CHECKIDENT ('Genres', RESEED, 0)");
+
             await context.SaveChangesAsync();
         }
 
