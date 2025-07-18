@@ -1,7 +1,7 @@
-﻿using MovieCore.DomainContracts;
+﻿using Microsoft.EntityFrameworkCore;
+using MovieCore.DomainContracts;
 using MovieCore.Models.Entities;
 using MovieData.Context;
-using System.Data.Entity;
 
 namespace MovieData.Repositories
 {

@@ -32,13 +32,14 @@ namespace MovieData.Repositories
                 .Include(m => m.Actors);
         }
 
-        public async Task<Movie> GetAsync(int id)
+        public async Task<Movie?> GetAsync(int id)
         {
             return await context.Movies
+                .Include(m => m.Genre)
                 .Include(m => m.MovieDetails)
                 .Include(m => m.Reviews)
                 .Include(m => m.Actors)
-                .FirstAsync(m => m.Id == id);
+                .SingleOrDefaultAsync(m => m.Id == id);
         }
 
         public void Remove(Movie movie)

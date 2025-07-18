@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using MovieContracts;
 using MovieCore.Models.Dtos;
 using MovieCore.Models.Paging;
@@ -71,12 +72,15 @@ namespace MoviePresentation.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<MovieDto>> GetMovieById(int id)
         {
-            var movieDto = await serviceManager.MovieService.GetMovieByIdAsync(id);
-
-            if (movieDto is null)
-                return NotFound($"Filmen med id {id} hittades inte eller saknar detaljer.");
-
-            return Ok(movieDto);
+            try
+            {
+                var movie = await serviceManager.MovieService.GetByIdAsync(id);
+                return Ok(movie);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
         //// GET: api/movies/{id}
@@ -215,9 +219,24 @@ namespace MoviePresentation.Controllers
         [HttpPost]
         public async Task<ActionResult<MovieDto>> CreateMovie(MovieCreateDto movieCreateDto)
         {
-            var createdMovie = await serviceManager.MovieService.CreateMovieAsync(movieCreateDto);
+            try
+            {
+                var createdMovie = await serviceManager.MovieService.CreateMovieAsync(movieCreateDto);
 
-            return CreatedAtAction(nameof(GetMovieById), new { id = createdMovie.Id }, createdMovie);
+                return CreatedAtAction(nameof(GetMovieById), new { id = createdMovie.Id }, createdMovie);
+            }
+            catch (ArgumentException ex)
+            {
+                var problemDetails = new ProblemDetails
+                {
+                    Title = "Ogiltigt genre-id",
+                    Detail = ex.Message,
+                    Status = StatusCodes.Status400BadRequest,
+                    Instance = HttpContext.Request.Path
+                };
+
+                return BadRequest(problemDetails);
+            }
         }
 
         //// POST: api/movies

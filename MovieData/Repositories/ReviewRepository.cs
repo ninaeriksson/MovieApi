@@ -1,9 +1,9 @@
-﻿using MovieCore.DomainContracts;
+﻿using Microsoft.EntityFrameworkCore;
+using MovieCore.DomainContracts;
 using MovieCore.Models.Dtos;
 using MovieCore.Models.Entities;
 using MovieCore.Models.Paging;
 using MovieData.Context;
-using System.Data.Entity;
 
 namespace MovieData.Repositories
 {

@@ -6,7 +6,7 @@ namespace MovieContracts
     public interface IMovieService
     {
         Task<PagedResult<MovieDto>> GetAllAsync(PagingParameters paging);
-        Task<MovieDto?> GetMovieByIdAsync(int id);
+        Task<MovieDto?> GetByIdAsync(int id);
         Task<MovieDetailDto?> GetMovieDetailsAsync(int id);
         Task<MovieDto> CreateMovieAsync(MovieCreateDto dto);
         Task<bool> UpdateMovieAsync(int id, MovieUpdateDto dto);

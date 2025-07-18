@@ -124,12 +124,12 @@ namespace MovieServices.Services
 
 
 
-        public async Task<MovieDto?> GetMovieByIdAsync(int id)
+        public async Task<MovieDto?> GetByIdAsync(int id)
         {
             var movie = await unitOfWork.Movies.GetAsync(id);
 
             if (movie == null)
-                return null;
+                throw new KeyNotFoundException($"Film med id {id} hittades inte.");
 
             return new MovieDto
             {
