@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using MovieContracts;
 using MovieCore.DomainContracts;
 using MovieCore.Models.Dtos;
@@ -42,6 +43,40 @@ namespace MovieServices.Services
                 PageSize = paging.PageSize
             };
         }
+
+        public async Task<ReviewDto> AddReviewAsync(ReviewCreateDto dto)
+        {
+            var movie = await unitOfWork.Movies
+                .GetAll()
+                .Include(m => m.Reviews)
+                .FirstOrDefaultAsync(m => m.Id == dto.MovieId);
+
+            if (movie == null)
+                throw new ArgumentException($"Filmen med id {dto.MovieId} finns inte.");
+
+            if (movie.Reviews.Count >= 10)
+                throw new InvalidOperationException("En film får max ha 10 recensioner.");
+
+            var review = new Review
+            {
+                MovieId = dto.MovieId,
+                ReviewerName = dto.ReviewerName,
+                Rating = dto.Rating,
+                Comment = dto.Comment
+            };
+
+            unitOfWork.Reviews.Add(review);
+            await unitOfWork.CompleteAsync();
+
+            return new ReviewDto
+            {
+                Id = review.Id,
+                ReviewerName = review.ReviewerName,
+                Rating = review.Rating,
+                Comment = review.Comment
+            };
+        }
+
 
     }
 }

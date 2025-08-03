@@ -219,25 +219,66 @@ namespace MoviePresentation.Controllers
         [HttpPost]
         public async Task<ActionResult<MovieDto>> CreateMovie(MovieCreateDto movieCreateDto)
         {
+            if (!ModelState.IsValid)
+            {
+                var details = new ValidationProblemDetails(ModelState)
+                {
+                    Status = 400,
+                    Title = "Valideringsfel",
+                };
+                return BadRequest(details);
+            }
+
             try
             {
                 var createdMovie = await serviceManager.MovieService.CreateMovieAsync(movieCreateDto);
 
                 return CreatedAtAction(nameof(GetMovieById), new { id = createdMovie.Id }, createdMovie);
             }
-            catch (ArgumentException ex)
+            catch (InvalidOperationException ex)
             {
                 var problemDetails = new ProblemDetails
                 {
-                    Title = "Ogiltigt genre-id",
-                    Detail = ex.Message,
-                    Status = StatusCodes.Status400BadRequest,
-                    Instance = HttpContext.Request.Path
+                    Status = 400,
+                    Title = "Felaktigt värde",
+                    Detail = ex.Message
                 };
-
                 return BadRequest(problemDetails);
             }
+            catch (Exception)
+            {
+                var problemDetails = new ProblemDetails
+                {
+                    Status = 500,
+                    Title = "Internt serverfel",
+                    Detail = "Något gick fel på servern."
+                };
+                return StatusCode(500, problemDetails);
+            }
         }
+
+        [HttpPost("{actorId}/movies/{movieId}")]
+        public async Task<IActionResult> AddActorToMovie(int actorId, int movieId)
+        {
+            try
+            {
+                await serviceManager.ActorService.AddActorToMovieAsync(actorId, movieId);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Ett oväntat fel uppstod." });
+            }
+        }
+
 
         //// POST: api/movies
         //[HttpPost]

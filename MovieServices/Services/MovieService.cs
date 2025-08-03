@@ -23,7 +23,21 @@ namespace MovieServices.Services
 
         public async Task<MovieDto> CreateMovieAsync(MovieCreateDto dto)
         {
+            var existMovie = await unitOfWork.Movies
+            .GetAll()
+            .FirstOrDefaultAsync(m => m.Title.ToLower() == dto.Title.ToLower());
+
+            if (existMovie != null)
+            {
+                throw new InvalidOperationException($"En film med titeln '{dto.Title}' finns redan.");
+            }
+
             var genre = await unitOfWork.Genres.GetByIdAsync(dto.GenreId);
+
+            if (genre?.Name == "Dokumentär" && dto.Budget > 1000000)
+            {
+                throw new InvalidOperationException("En dokumentärfilm får inte ha en budget över en miljon.");
+            }
             if (genre == null)
             {
                 throw new ArgumentException($"Genren med id {dto.GenreId} finns inte.");
@@ -129,7 +143,7 @@ namespace MovieServices.Services
             var movie = await unitOfWork.Movies.GetAsync(id);
 
             if (movie == null)
-                throw new KeyNotFoundException($"Film med id {id} hittades inte.");
+                throw new KeyNotFoundException($"Filmen med id {id} hittades inte.");
 
             return new MovieDto
             {
@@ -145,7 +159,6 @@ namespace MovieServices.Services
         }
 
 
-
         public async Task<MovieDetailDto?> GetMovieDetailsAsync(int id)
         {
             var movie = await unitOfWork.Movies.GetAsync(id);
@@ -157,7 +170,7 @@ namespace MovieServices.Services
             {
                 Title = movie.Title,
                 Year = movie.Year,
-                Genre = movie.Genre?.Name ?? "", // <-- ändrad här
+                Genre = movie.Genre?.Name ?? "",
                 Duration = movie.Duration,
                 Synopsis = movie.MovieDetails?.Synopsis ?? "",
                 Language = movie.MovieDetails?.Language ?? "",

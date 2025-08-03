@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using MovieContracts;
 using MovieCore.Models.Dtos;
 using MovieCore.Models.Paging;
@@ -39,6 +40,21 @@ namespace MoviePresentation.Controllers
 
             return Ok(response);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> AddReview([FromBody] ReviewCreateDto dto)
+        {
+            try
+            {
+                var review = await serviceManager.ReviewService.AddReviewAsync(dto);
+                return Ok(review);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
 
     }
 }

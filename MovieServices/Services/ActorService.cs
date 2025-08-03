@@ -1,4 +1,5 @@
-﻿using MovieContracts;
+﻿using Microsoft.EntityFrameworkCore;
+using MovieContracts;
 using MovieCore.DomainContracts;
 using MovieCore.Models.Dtos;
 
@@ -14,24 +15,31 @@ namespace MovieServices.Services
         }
 
 
-        public async Task<bool> AddActorToMovieAsync(int actorId, int movieId)
+        public async Task AddActorToMovieAsync(int actorId, int movieId)
         {
-            var movie = await unitOfWork.Movies.GetAsync(movieId);
+            var movie = await unitOfWork.Movies
+                .GetAll()
+                .Include(m => m.Genre)
+                .Include(m => m.Actors)
+                .FirstOrDefaultAsync(m => m.Id == movieId);
+
             if (movie == null)
-                return false;
+                throw new KeyNotFoundException($"Filmen med id {movieId} finns inte.");
+
+            if (movie.Genre?.Name == "Dokumentär" && movie.Actors.Count >= 10)
+                throw new InvalidOperationException("En dokumentärfilm får inte ha fler än 10 skådespelare.");
 
             var actor = await unitOfWork.Actors.GetAsync(actorId);
             if (actor == null)
-                return false;
+                throw new KeyNotFoundException($"Skådespelaren med id {actorId} finns inte.");
 
             if (movie.Actors.Any(a => a.Id == actorId))
-                return false;
+                throw new InvalidOperationException("Skådespelaren är redan kopplad till filmen.");
 
             movie.Actors.Add(actor);
             await unitOfWork.CompleteAsync();
-
-            return true;
         }
+
 
 
         public async Task<IEnumerable<ActorDto>> GetAllAsync()

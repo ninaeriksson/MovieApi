@@ -11,6 +11,6 @@ namespace MovieContracts
     {
         Task<ActorDto?> GetByIdAsync(int id);
         Task<IEnumerable<ActorDto>> GetAllAsync();
-        Task<bool> AddActorToMovieAsync(int actorId, int movieId);
+        Task AddActorToMovieAsync(int actorId, int movieId);
     }
 }
