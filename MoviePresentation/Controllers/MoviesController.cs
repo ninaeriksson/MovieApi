@@ -43,15 +43,20 @@ namespace MoviePresentation.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<MovieDto>> GetMovieById(int id)
         {
-            try
+            var movie = await serviceManager.MovieService.GetByIdAsync(id);
+
+            if (movie == null)
             {
-                var movie = await serviceManager.MovieService.GetByIdAsync(id);
-                return Ok(movie);
+                var problemDetails = new ProblemDetails
+                {
+                    Status = 404,
+                    Title = "Not Found",
+                    Detail = $"Filmen med id {id} hittades inte."
+                };
+                return NotFound(problemDetails);
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
+
+            return Ok(movie);
         }
  
 
@@ -62,7 +67,15 @@ namespace MoviePresentation.Controllers
             var movieDetailDto = await serviceManager.MovieService.GetMovieDetailsAsync(id);
 
             if (movieDetailDto is null)
-                return NotFound($"Filmen med id {id} hittades inte.");
+            {
+                var problemDetails = new ProblemDetails
+                {
+                    Title = "Not Found",
+                    Status = 404,
+                    Detail = $"Filmen med id {id} hittades inte."
+                };
+                return NotFound(problemDetails);
+            }
 
             return Ok(movieDetailDto);
         }
@@ -75,7 +88,15 @@ namespace MoviePresentation.Controllers
             var success = await serviceManager.MovieService.UpdateMovieAsync(id, movieUpdateDto);
 
             if (!success)
-                return NotFound($"Filmen med id {id} hittades inte.");
+            {
+                var problemDetails = new ProblemDetails
+                {
+                    Title = "Not Found",
+                    Status = 404,
+                    Detail = $"Filmen med id {id} hittades inte."
+                };
+                return NotFound(problemDetails);
+            }
 
             return NoContent();
         }
@@ -130,7 +151,15 @@ namespace MoviePresentation.Controllers
             var deleted = await serviceManager.MovieService.DeleteMovieAsync(id);
 
             if (!deleted)
-                return NotFound($"Filmen med id {id} hittades inte.");
+            {
+                var problemDetails = new ProblemDetails
+                {
+                    Title = "Not Found",
+                    Status = 404,
+                    Detail = $"Filmen med id {id} hittades inte."
+                };
+                return NotFound(problemDetails);
+            }
 
             return NoContent();
         }

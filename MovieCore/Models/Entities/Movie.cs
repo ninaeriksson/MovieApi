@@ -6,8 +6,7 @@
         public string Title { get; set; } = null!;
         public int Year { get; set; }
         public int Duration { get; set; }
-        public int GenreId { get; set; }
-        
+        public int GenreId { get; set; }  
         public Genre? Genre { get; set; }
         public MovieDetails? MovieDetails { get; set; }
 

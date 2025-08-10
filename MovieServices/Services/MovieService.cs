@@ -143,7 +143,7 @@ namespace MovieServices.Services
             var movie = await unitOfWork.Movies.GetAsync(id);
 
             if (movie == null)
-                throw new KeyNotFoundException($"Filmen med id {id} hittades inte.");
+                return null;
 
             return new MovieDto
             {
